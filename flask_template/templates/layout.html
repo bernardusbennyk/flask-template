@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ APP_NAME }}{{ " - " ~ menu if menu else "" }}</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='assets/favicon.ico') }}">
+
+    <!-- Bootstrap 5 CSS -->    
+    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap-5.0.2-dist/css/bootstrap.min.css') }}">    
+    <style>   
+        :root {
+            --main: #1E518E;
+        }   
+
+        body {
+            background: #F7F7F7;
+            font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;            
+        }        
+    </style>
+</head>
+
+
+<body>    
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background: var(--main);">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">{{ APP_NAME }}</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="#">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Transaction</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Report</a>
+                    </li>
+                </ul>
+            </div>
+            <div>
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+                    </li>
+                </ul>
+            </div>            
+        </div>
+    </nav>    
+
+    <div class="container">        
+        {% block content %}{% endblock content %}
+    </div>
+
+    <footer class="fixed-bottom text-end p-2" style="background: #FFFFFF;">        
+        <sup class="text-secondary">
+            &#169; 
+            {{ COPYRIGHT }} {{ APP_NAME }} {{ VERSION }}
+        </sup>                                  
+    </footer>
+
+    <!-- Bootstrap 5 JS -->        
+    <script src="{{ url_for('static', filename='bootstrap-5.0.2-dist/js/bootstrap.bundle.min.js') }}"></script>        
+    <!-- Font Awesome 6 -->        
+    <script src="{{ url_for('static', filename='font-awesome-6/font-awesome-6.js') }}"></script>        
+    <!-- Jquery 3.6.4 -->        
+    <script src="{{ url_for('static', filename='jquery-3.6.4/jquery-3.6.4.min.js') }}"></script>            
+    
+
+    <script type="text/javascript">
+        function showLoading() {
+
+        };
+
+        function hideLoading() {
+
+        };
+    </script>
+
+    {% block script %}
+    {% endblock script %}
+</body>
+
+</html>

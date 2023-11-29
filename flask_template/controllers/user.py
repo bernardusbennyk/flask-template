@@ -1,0 +1,85 @@
+from flask import render_template, request, redirect, url_for, flash
+from flask_login import current_user, login_user, logout_user, login_required
+from hashlib import md5
+from flask_template import app, login_manager
+from flask_template.models.userModel import User
+from flask_template.dao.userDao import (getDataUserLoader, validateUserLogin)
+
+@login_manager.user_loader
+def load_user(user_id):
+    """ Load session user """
+    v_get_data_user_loader = getDataUserLoader(user_id)
+    # If user not exists or error return None
+    if (v_get_data_user_loader["status"] == "F" or not v_get_data_user_loader["result"]): return None
+
+    # Set session user
+    user_id     = v_get_data_user_loader["result"][0]["u_id"]
+    username    = v_get_data_user_loader["result"][0]["u_username"]
+    user_role   = v_get_data_user_loader["result"][0]["u_role"]
+    return User(user_id, username, user_role)
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    # Load login page
+    if request.method == "GET":  
+        # If already log in, redirect user to home page
+        if (current_user.is_authenticated):
+            return redirect(url_for("home"))
+        
+        return render_template("login.html", menu="Login")
+    # Process log in
+    elif request.method == "POST":
+        username    = request.form.get("username", None)
+        password    = request.form.get("password", None)
+
+        # Validate data
+        if (username in [None, ""]):
+            message     = "Username must not be empty."
+            flash_type  = "danger"
+            flash(message, flash_type)
+            return redirect(url_for("login"))
+        if (password in [None, ""]):
+            message     = "Password must not be empty."
+            flash_type  = "danger"
+            flash(message, flash_type)
+            return redirect(url_for("login"))
+        
+        # Hash password with md5
+        password    = md5(password.encode()).hexdigest()
+
+        # Validate user login
+        v_validate_user_login   = validateUserLogin(username, password)
+        if (v_validate_user_login["status"] == "F"):
+            message     = v_validate_user_login["message"]
+            flash_type  = "danger"
+            flash(message, flash_type)
+            return redirect(url_for("login"))
+        elif (not v_validate_user_login["result"]):
+            message     = "Username and password not match."
+            flash_type  = "danger"
+            flash(message, flash_type)
+            return redirect(url_for("login"))
+        
+        # Set user data
+        v_id            = v_validate_user_login["result"][0]["u_id"] 
+        v_username      = v_validate_user_login["result"][0]["u_username"] 
+        v_role          = v_validate_user_login["result"][0]["u_role"]
+        v_status_user   = v_validate_user_login["result"][0]["u_status"]
+
+        # Check status user active or inactive 
+        if (v_status_user == "F"):
+            message     = "Account deactivated."
+            flash_type  = "danger"
+            flash(message, flash_type)
+            return redirect(url_for("login"))
+        
+        # Set session user loader
+        user    = User(v_id, v_username, v_role)        
+        login_user(user)
+        return redirect(url_for("home"))
+
+@app.route('/logout', methods=['GET'])
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for("login"))
