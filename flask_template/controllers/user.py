@@ -26,23 +26,27 @@ def login():
         if (current_user.is_authenticated):
             return redirect(url_for("home"))
         
-        return render_template("login.html", menu="Login")
+        # For highlight invalid form
+        validate    = request.args.getlist("validate")
+
+        return render_template("login.html", menu="Login", validate=validate)
+    
     # Process log in
     elif request.method == "POST":
         username    = request.form.get("username", None)
         password    = request.form.get("password", None)
 
-        # Validate data
+        # Validate input data
+        validate    = []
         if (username in [None, ""]):
-            message     = "Username must not be empty."
-            flash_type  = "danger"
-            flash(message, flash_type)
-            return redirect(url_for("login"))
+            validate.append("username")            
         if (password in [None, ""]):
-            message     = "Password must not be empty."
+            validate.append("password")            
+        if (validate):
+            message     = f"{', '.join(validate)} must not be empty."
             flash_type  = "danger"
             flash(message, flash_type)
-            return redirect(url_for("login"))
+            return redirect(url_for("login", validate=validate))
         
         # Hash password with md5
         password    = md5(password.encode()).hexdigest()
