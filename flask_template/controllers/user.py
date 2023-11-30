@@ -3,7 +3,8 @@ from flask_login import current_user, login_user, logout_user, login_required
 from hashlib import md5
 from flask_template import app, login_manager
 from flask_template.models.userModel import User
-from flask_template.dao.userDao import (getDataUserLoader, validateUserLogin)
+from flask_template.controllers.validate import login_not_allowed
+from flask_template.dao.userDao import getDataUserLoader, validateUserLogin
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -19,13 +20,10 @@ def load_user(user_id):
     return User(user_id, username, user_role)
 
 @app.route("/login", methods=["GET", "POST"])
+@login_not_allowed
 def login():
     # Load login page
-    if request.method == "GET":  
-        # If already log in, redirect user to home page
-        if (current_user.is_authenticated):
-            return redirect(url_for("home"))
-        
+    if request.method == "GET":                          
         # For highlight invalid form
         validate    = request.args.getlist("validate")
 
