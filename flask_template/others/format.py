@@ -1,4 +1,4 @@
-def row_to_dict_list(cursor):
+def rows_to_dict_list(cursor):
     """ Format select query as column and value from database in dictionary """
     return [dict(zip([column[0] for column in cursor.description], row)) for row in cursor.fetchall()]
 

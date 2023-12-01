@@ -1,8 +1,8 @@
 import psycopg2
 from flask_template import connectionDB
-from flask_template.others.format import row_to_dict_list, responseJSON
+from flask_template.others.format import rows_to_dict_list, responseJSON
 
-def getDataUserLoader(p_id):
+def get_data_user_loader(p_id):
     """ Get data user for user_loader """
     conn    = None
     try:
@@ -25,7 +25,7 @@ def getDataUserLoader(p_id):
             }
 
             cursor.execute(query, params)
-            data    = row_to_dict_list(cursor)
+            data    = rows_to_dict_list(cursor)
             message = "Success get data user laoder."
             return responseJSON(200, "T", message, data)
         except psycopg2.Error as e:
@@ -42,7 +42,7 @@ def getDataUserLoader(p_id):
             conn.close()
 
 
-def validateUserLogin(p_username, p_password):
+def validate_user_login(p_username, p_password):
     """ Validate user log in """
     conn    = None
     try:
@@ -69,7 +69,7 @@ def validateUserLogin(p_username, p_password):
             }
 
             cursor.execute(query, params)
-            data    = row_to_dict_list(cursor)
+            data    = rows_to_dict_list(cursor)
             print(data)
             message = "Success validate user login."            
             return responseJSON(200, "T", message, data)

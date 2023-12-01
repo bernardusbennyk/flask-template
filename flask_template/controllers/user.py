@@ -4,12 +4,12 @@ from hashlib import md5
 from flask_template import app, login_manager
 from flask_template.models.userModel import User
 from flask_template.controllers.validate import login_not_allowed
-from flask_template.dao.userDao import getDataUserLoader, validateUserLogin
+from flask_template.dao.userDao import get_data_user_loader, validate_user_login
 
 @login_manager.user_loader
 def load_user(user_id):
     """ Load session user """
-    v_get_data_user_loader = getDataUserLoader(user_id)
+    v_get_data_user_loader = get_data_user_loader(user_id)
     # If user not exists or error return None
     if (v_get_data_user_loader["status"] == "F" or not v_get_data_user_loader["result"]): return None
 
@@ -50,7 +50,7 @@ def login():
         password    = md5(password.encode()).hexdigest()
 
         # Validate user login
-        v_validate_user_login   = validateUserLogin(username, password)
+        v_validate_user_login   = validate_user_login(username, password)
         if (v_validate_user_login["status"] == "F"):
             message     = v_validate_user_login["message"]
             flash_type  = "danger"
