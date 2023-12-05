@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ APP_NAME }}{{ " - " ~ menu if menu else "" }}</title>
     <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='assets/favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='assets/favicon-16x16.png') }}">    
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='assets/favicon.ico') }}">
 
     <!-- Bootstrap 5 CSS -->    
@@ -57,14 +59,14 @@
                         <form id="formLogin" method="POST" action="{{ url_for('login') }}">
                             <div class="mb-3">
                                 <label for="username" class="form-label">Username</label>
-                                <input type="text" class="form-control form-control-sm{{ ' is-invalid' if 'username' in validate }}" id="username" name="username" autocomplete="off"
+                                <input type="text" class="form-control form-control-sm{{ ' is-invalid' if 'username' in validate }}" id="username" name="username" value="{{ username }}" autocomplete="off"
                                     placeholder="username" maxlength="12" required 
                                     onkeydown="return this.value=this.value.toLowerCase()">
                             </div>
                             <div class="mb-3">
                                 <label for="password" class="form-label">Password</label>
                                 <input type="password" class="form-control form-control-sm{{ ' is-invalid' if 'password' in validate }}" id="password" name="password"
-                                    placeholder="password" maxlength="20" required>
+                                    placeholder="password" minlength="6" maxlength="20" required>
                             </div>
                             <div class="text-end">
                                 <button type="submit" class="btn btn-sm text-light btn-form" style="background: var(--main);">
