@@ -1,4 +1,4 @@
-from flask import abort, flash, redirect, render_template, request, url_for
+from flask import flash, redirect, render_template, request, url_for
 from flask_login import login_user, logout_user, login_required
 from hashlib import md5
 from flask_template import app, login_manager
