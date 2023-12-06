@@ -108,7 +108,7 @@
         function alertMessage(category, message) {            
             Swal.fire({
                 icon                : category == "danger" ? "error" : category, // Change category flash danger into error for icon
-                title               : "Notification",                
+                title               : category == "error" ? "Oops, something went wrong" : "Notification",                
                 html                : `<p class="alert alert-${category == "error" ? "danger" : category} p-2">${message}</p>`, // Change category error into danger for alert class
                 showConfirmButton   : false,
                 showCancelButton    : true,

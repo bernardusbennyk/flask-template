@@ -1,4 +1,4 @@
-from flask import render_template, request, redirect, url_for, flash
+from flask import abort, flash, redirect, render_template, request, url_for
 from flask_login import login_user, logout_user, login_required
 from hashlib import md5
 from flask_template import app, login_manager
@@ -22,7 +22,7 @@ def load_user(user_id):
 @login_not_allowed
 def login():
     # Load login page
-    if request.method == "GET":                          
+    if request.method == "GET":                              
         # For highlight invalid form
         validate    = request.args.getlist("validate")
 
