@@ -1,12 +1,10 @@
 # flask_template
 Template project for Flask Python
 
-Link assets: https://drive.google.com/drive/folders/1C_RVtgKaufwPaFMr1PX-f9eBec3q6si5?usp=drive_link
-
+Link assets: https://drive.google.com/drive/folders/1C_RVtgKaufwPaFMr1PX-f9eBec3q6si5?usp=drive_link  
 Put the static folder at same level with: controllers, dao, models, others and templates
 
-DDL for PostgreSQL is required to test with flask login:
-
+DDL for PostgreSQL is required to test with flask login:  
 CREATE TABLE users (
     u_username varchar(12) NOT NULL,
     u_password varchar(200) NOT NULL,
