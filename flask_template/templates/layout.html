@@ -105,7 +105,7 @@
         {% for category, message in messages %}        
         <script type="text/javascript">
             let category    = '{{ category }}';
-            let message     = '{{ message|safe }}';
+            let message     = '{{ message|trim|safe }}';
             alertMessage(category, message);
         </script>        
         {% endfor %}    
