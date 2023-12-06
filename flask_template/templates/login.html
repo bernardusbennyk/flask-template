@@ -52,7 +52,7 @@
                         <label class="text-center w-100">
                             {% for category, message in messages %}                            
                             <div class="alert alert-{{ category }} p-1" role="alert">
-                                {{message}}
+                                {{ message|safe }}
                             </div>                            
                             {% endfor %}
                         </label>

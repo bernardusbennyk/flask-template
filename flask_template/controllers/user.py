@@ -43,7 +43,7 @@ def login():
         if (password in [None, ""]):
             validate.append("password")            
         if (validate):
-            message     = f"{', '.join(validate)} must not be empty."
+            message     = f"<strong>{', '.join(validate)}</strong> must not be empty."
             flash_type  = "danger"
             flash(message, flash_type)
             return redirect(url_for("login", validate=validate))
