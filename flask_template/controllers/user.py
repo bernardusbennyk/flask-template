@@ -55,7 +55,7 @@ def login():
         v_validate_user_login   = validate_user_login(username, password)
         if (v_validate_user_login["status"] == "F"):
             message     = v_validate_user_login["message"]
-            flash_type  = "danger"
+            flash_type  = "error"
             flash(message, flash_type)
             return redirect(url_for("login"))
         elif (not v_validate_user_login["result"]):
@@ -72,13 +72,13 @@ def login():
         # Check status user active or inactive 
         if (v_status_user == "F"):
             message     = "Account deactivated."
-            flash_type  = "danger"
+            flash_type  = "info"
             flash(message, flash_type)
             return redirect(url_for("login"))
         
         # Set session user loader
         user    = User(v_username, v_role)        
-        login_user(user)        
+        login_user(user)                               
         return redirect(url_for("home"))
 
 @app.route('/logout', methods=['GET'])

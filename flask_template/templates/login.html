@@ -4,13 +4,16 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ APP_NAME }}{{ " - " ~ menu if menu else "" }}</title>
+
     <!-- Favicon -->
     <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='assets/favicon-32x32.png') }}">
     <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='assets/favicon-16x16.png') }}">    
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='assets/favicon.ico') }}">
-
     <!-- Bootstrap 5 CSS -->    
     <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap-5.0.2-dist/css/bootstrap.min.css') }}">    
+    <!-- Sweet Alert 2 CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='sweetalert2/sweetalert2.min.css') }}">    
+
     <style>   
         :root {
             --main: #1E518E;
@@ -48,9 +51,11 @@
                         {% if messages %}
                         <label class="text-center w-100">
                             {% for category, message in messages %}
+                            {% if category != "error" %}
                             <div class="alert alert-{{ category }} p-1" role="alert">
                                 {{message}}
                             </div>
+                            {% endif %}
                             {% endfor %}
                         </label>
                         {% endif %}
@@ -94,24 +99,41 @@
 
     <!-- Bootstrap 5 JS -->        
     <script src="{{ url_for('static', filename='bootstrap-5.0.2-dist/js/bootstrap.bundle.min.js') }}"></script>        
-    <!-- Font Awesome 6 -->        
-    <script src="{{ url_for('static', filename='font-awesome-6/font-awesome-6.js') }}"></script>        
     <!-- Jquery 3.6.4 -->        
     <script src="{{ url_for('static', filename='jquery-3.6.4/jquery-3.6.4.min.js') }}"></script>            
-    
+    <!-- Font Awesome 6 -->        
+    <script src="{{ url_for('static', filename='font-awesome-6/font-awesome-6.js') }}"></script>        
+    <!-- Sweet Alert 2 -->
+    <script src="{{ url_for('static', filename='sweetalert2/sweetalert2.min.js') }}"></script>
 
     <script type="text/javascript">
-        function showLoading() {
-
-        };
-
-        function hideLoading() {
-
+        function alertMessage(category, message) {            
+            Swal.fire({
+                icon                : category == "danger" ? "error" : category, // Change category flash danger into error for icon
+                title               : "Notification",                
+                html                : `<p class="alert alert-${category == "error" ? "danger" : category} p-2">${message}</p>`, // Change category error into danger for alert class
+                showConfirmButton   : false,
+                showCancelButton    : true,
+                cancelButtonText    : "Close",
+                allowOutsideClick   : false,
+                position            : "top"
+            });
         };
     </script>
 
-    {% block script %}
-    {% endblock script %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}    
+        {% for category, message in messages %}
+        {% if category == "error" %}
+        <script type="text/javascript">
+            let category    = '{{ category }}';
+            let message     = '{{ message|trim|safe }}';
+            alertMessage(category, message);
+        </script>
+        {% endif %}
+        {% endfor %}    
+    {% endif %}
+    {% endwith %}    
 </body>
 
 </html>
