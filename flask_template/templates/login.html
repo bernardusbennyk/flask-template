@@ -142,14 +142,27 @@
             }
         };
     
-        $("#formLogin").validate({            
+        $("#formLogin").validate({    
+            rules           : {
+                username    : {
+                    required    : true,
+                    maxlength   : 12
+                },
+                password    : {
+                    required    : true,
+                    minlength   : 6,
+                    maxlength   : 20
+                }
+            },        
             messages        : {
                 username        : {
-                    required        : "This field is required."
+                    required        : "This field is required.",
+                    maxlength       : "Username must not exceed {0} characters."
                 },
                 password        : {
                     required        : "This field is required.",
-                    minlength       : "Please enter at least {0} characters."
+                    minlength       : "Please enter at least {0} characters.",
+                    maxlength       : "Password must not exceed {0} characters."
                 }
             },
             errorPlacement  : function (error, element) {
