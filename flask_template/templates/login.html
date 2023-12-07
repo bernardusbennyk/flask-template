@@ -97,7 +97,9 @@
     <!-- Bootstrap 5 JS -->        
     <script src="{{ url_for('static', filename='bootstrap-5.0.2-dist/js/bootstrap.bundle.min.js') }}"></script>        
     <!-- Jquery 3.6.4 -->        
-    <script src="{{ url_for('static', filename='jquery-3.6.4/jquery-3.6.4.min.js') }}"></script>            
+    <script src="{{ url_for('static', filename='jquery-3.6.4/jquery-3.6.4.min.js') }}"></script>     
+    <!-- Jquery Validate -->
+    <script src="{{ url_for('static', filename='jquery-3.6.4/jquery.validate.min.js') }}"></script>
     <!-- Font Awesome 6 -->        
     <script src="{{ url_for('static', filename='font-awesome-6/font-awesome-6.js') }}"></script>        
     <!-- Sweet Alert 2 -->
@@ -138,7 +140,39 @@
                 }
                 event.preventDefault();
             }
-        }
+        };
+    
+        $("#formLogin").validate({            
+            messages        : {
+                username        : {
+                    required        : "This field is required."
+                },
+                password        : {
+                    required        : "This field is required.",
+                    minlength       : "Please enter at least {0} characters."
+                }
+            },
+            errorPlacement  : function (error, element) {
+                // Custom error placement for Bootstrap
+                error.addClass("invalid-feedback");
+                error.insertAfter(element);
+            },
+            highlight: function (element, errorClass, validClass) {
+                // Add Bootstrap is-invalid class to the form-control element
+                $(element).addClass("is-invalid");
+                // Add error class to the label
+                $(element).prev('label').addClass("is-invalid");
+            },
+            unhighlight: function (element, errorClass, validClass) {
+                // Remove Bootstrap is-invalid class from the form-control element
+                $(element).removeClass("is-invalid");
+                // Remove error class from the label
+                $(element).prev('label').removeClass("is-invalid");
+            },           
+            submitHandler   : function (form) {
+                form.submit();
+            }
+        });
     </script>
 
     {% with messages = get_flashed_messages(with_categories=true, category_filter=["error"]) %}

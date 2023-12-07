@@ -77,6 +77,8 @@
     <script src="{{ url_for('static', filename='bootstrap-5.0.2-dist/js/bootstrap.bundle.min.js') }}"></script>        
     <!-- Jquery 3.6.4 -->        
     <script src="{{ url_for('static', filename='jquery-3.6.4/jquery-3.6.4.min.js') }}"></script>  
+    <!-- Jquery Validate -->
+    <script src="{{ url_for('static', filename='jquery-3.6.4/jquery.validate.min.js') }}"></script>
     <!-- Font Awesome 6 -->        
     <script src="{{ url_for('static', filename='font-awesome-6/font-awesome-6.js') }}"></script>        
     <!-- Sweet Alert 2 -->
@@ -96,7 +98,7 @@
             });
         };
 
-        function validateInput(event, format_text) {            
+        function validateAlnum(event, format_text) {            
             // Get the pressed key
             var key = event.key;
 
@@ -117,7 +119,7 @@
                 }
                 event.preventDefault();
             }
-        }
+        };
     </script>
 
     {% block script %}
