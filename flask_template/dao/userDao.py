@@ -57,8 +57,8 @@ def validate_user_login(p_username, p_password):
                             FROM 
                                 users
                             WHERE
-                                u_username      = %(username)s
-                                AND u_password  = %(password)s
+                                UPPER (u_username)  = UPPER (%(username)s)
+                                AND u_password      = %(password)s
                         """
             params  = {
                 "username"  : p_username,

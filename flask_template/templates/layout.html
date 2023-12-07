@@ -95,6 +95,29 @@
                 position            : "top"
             });
         };
+
+        function validateInput(event, format_text) {            
+            // Get the pressed key
+            var key = event.key;
+
+            // Use a regular expression to check if the key is a letter or a number
+            var regex = /^[a-zA-Z0-9]$/;
+
+            if (!regex.test(key)) {
+                // If the key is not valid, prevent its input
+                event.preventDefault();                
+            } else {
+                // If pressed key is valid
+                if (format_text == "lower") {
+                    event.target.value += key.toLowerCase();
+                } else if (format_text == "upper") {
+                    event.target.value += key.toUpperCase();
+                } else {
+                    event.target.value += key;
+                }
+                event.preventDefault();
+            }
+        }
     </script>
 
     {% block script %}
