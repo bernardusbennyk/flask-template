@@ -63,7 +63,7 @@
                             <div class="mb-3">
                                 <label for="username" class="form-label">Username</label>
                                 <input type="text" class="form-control form-control-sm{{ ' is-invalid' if 'username' in validate }}" id="username" name="username" value="{{ username }}" autocomplete="off"
-                                    placeholder="username" maxlength="12" onkeypress="validateInput(event, 'lower')" required>
+                                    placeholder="username" maxlength="12" onkeypress="validateAlnum(event, 'lower')" required>
                             </div>
                             <div class="mb-3">
                                 <label for="password" class="form-label">Password</label>
@@ -117,12 +117,12 @@
             });
         };
 
-        function validateInput(event, format_text) {            
+        function validateAlnum(event, format_text) {            
             // Get the pressed key
-            var key = event.key;
+            let key = event.key;
 
             // Use a regular expression to check if the key is a letter or a number
-            var regex = /^[a-zA-Z0-9]$/;
+            let regex = /^[a-zA-Z0-9]$/;
 
             if (!regex.test(key)) {
                 // If the key is not valid, prevent its input
