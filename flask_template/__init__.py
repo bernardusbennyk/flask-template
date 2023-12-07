@@ -25,6 +25,4 @@ def connectionDB():
     return conn
 
 # Declare route controller application
-from flask_template.controllers.routes import (global_var)
-from flask_template.controllers.validate import (login_not_allowed)
-from flask_template.controllers.user import (login)
+from flask_template.controllers import (routes, validate, user)
