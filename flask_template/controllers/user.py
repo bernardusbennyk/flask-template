@@ -14,7 +14,7 @@ def load_user(user_id):
         v_get_data_user_loader = login.get_data_user_loader(user_id)
         # If user not exists or error return None
         if (v_get_data_user_loader["status"] == "F" or not v_get_data_user_loader["result"]): 
-            app.logger.error(f"dao get_data_user_loader: {v_get_data_user_loader['message']}")
+            app.logger.error(f"DAO get_data_user_loader: {v_get_data_user_loader['message']}")
             return None
 
         # Set session user    
@@ -22,7 +22,7 @@ def load_user(user_id):
         user_role   = v_get_data_user_loader["result"][0]["u_role"]
         return User(username, user_role)
     except Exception as e:
-        print("Error load_user", str(e))
+        app.logger.error(f"Controller load_user: {e}")
         abort(500, str(e))
     finally:
         del login
@@ -65,7 +65,7 @@ def login():
             # Validate user login
             v_validate_user_login   = login.validate_user_login(username, password)
             if (v_validate_user_login["status"] == "F"):
-                app.logger.error(f"dao validate_user_login: {v_validate_user_login['message']}")
+                app.logger.error(f"DAO validate_user_login: {v_validate_user_login['message']}")
                 message     = v_validate_user_login["message"]
                 flash_type  = "error"
                 flash(message, flash_type)
@@ -93,7 +93,7 @@ def login():
             login_user(user)                               
             return redirect(url_for("home"))
         except Exception as e:
-            app.logger.error(f"controller login (POST): {e}")
+            app.logger.error(f"Controller login (POST): {e}")
             abort(500, str(e))
         finally:
             del login

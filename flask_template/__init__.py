@@ -1,7 +1,11 @@
 import logging, psycopg2
 import logging.handlers
+from dotenv import load_dotenv
 from flask import Flask
 from flask_login import LoginManager
+
+# Load dotenv
+load_dotenv()
 
 # Create Flask app
 app = Flask(__name__)
@@ -23,12 +27,13 @@ handler.setFormatter(log_format)
 app.logger.addHandler(handler)
 app.logger.setLevel(logging.INFO)
 
-def connectionDB():
+def connectionDB():    
     conn = psycopg2.connect(
-        host        = app.config['HOST_DB'],
-        database    = app.config['DATABASE_DB'],
-        user        = app.config['USER_DB'],
-        password    = app.config['PASSWORD_DB']
+        host        = app.config["HOST_DB"],
+        database    = app.config["SID_DB"],
+        port        = app.config["PORT_DB"],
+        user        = app.config["USER_DB"],
+        password    = app.config["PASSWORD_DB"]
     )
     return conn
 
