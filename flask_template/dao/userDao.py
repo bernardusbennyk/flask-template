@@ -2,83 +2,62 @@ import psycopg2
 from flask_template import connectionDB
 from flask_template.others.format import rows_to_dict_list, responseJSON
 
-def get_data_user_loader(p_id):
-    """ Get data user for user_loader """
-    conn    = None
-    try:
-        cursor  = None
-        conn    = connectionDB()
-        try:
-            cursor  = conn.cursor()
-            query   =   """
-                            SELECT                                                                 
-                                u_role
-                            FROM 
-                                users
-                            WHERE
-                                u_username = %(id)s
-                        """
-            params  = {
-                "id"    : p_id
-            }
+class Login:
+    def __init__(self):
+        self.__conn = connectionDB()
 
-            cursor.execute(query, params)
-            data    = rows_to_dict_list(cursor)
-            message = "Success get data user laoder."
+    def __del__(self):
+        if (self.__conn):
+            self.__conn.close()
+
+    def get_data_user_loader(self, id):
+        """ Get data user for user_loader """
+        try:
+            with self.__conn.cursor() as cursor:
+                query   =   """
+                                SELECT                                                                 
+                                    u_role
+                                FROM 
+                                    users
+                                WHERE
+                                    u_username = %(id)s                                
+                            """
+                params  = {
+                    "id"      : id
+                }
+                cursor.execute(query, params)
+                data    = rows_to_dict_list(cursor) 
+
+            message = "Success get data user laoder"
             return responseJSON(200, "T", message, data)
         except psycopg2.Error as e:
-            message = f"Error query: {str(e)}"
-            return responseJSON(400, "F", message, [])
-        finally:
-            if (cursor):
-                cursor.close()
-    except psycopg2.Error as e:        
-        message = f"Error connection: {str(e)}"
-        return responseJSON(400, "F", message, [])
-    finally:
-        if (conn):            
-            conn.close()
-
-
-def validate_user_login(p_username, p_password):
-    """ Validate user log in """
-    conn    = None
-    try:
-        cursor  = None        
-        conn    = connectionDB()
+            return responseJSON(400, "F", str(e), []) 
+        
+    def validate_user_login(self, username, password):
+        """ Get data user for user_loader """
         try:
-            cursor  = conn.cursor()
-            query   =   """
-                            SELECT                                 
-                                u_username,
-                                u_password,
-                                u_role,
-                                u_status
-                            FROM 
-                                users
-                            WHERE
-                                UPPER (u_username)  = UPPER (%(username)s)
-                                AND u_password      = %(password)s
-                        """
-            params  = {
-                "username"  : p_username,
-                "password"  : p_password
-            }
+            with self.__conn.cursor() as cursor:
+                query   =   """
+                                SELECT                                 
+                                    u_username,
+                                    u_password,
+                                    u_role,
+                                    u_status
+                                FROM 
+                                    users
+                                WHERE
+                                    UPPER (u_username)  = UPPER (%(username)s)
+                                    AND u_password      = %(password)s                               
+                            """
+                params  = {
+                    "username"  : username,
+                    "password"  : password
+                }
+                cursor.execute(query, params)
+                data    = rows_to_dict_list(cursor) 
 
-            cursor.execute(query, params)
-            data    = rows_to_dict_list(cursor)
-
-            message = "Success validate user login."            
+            message = "Success validate user login"
             return responseJSON(200, "T", message, data)
         except psycopg2.Error as e:
-            message = f"Error query: {str(e)}"
-            return responseJSON(400, "F", message, [])
-        finally:
-            if (cursor):
-                cursor.close()
-    except psycopg2.Error as e:        
-        message = f"Error connection: {str(e)}"
-        return responseJSON(400, "F", message, [])
-    finally:
-        if (conn):            
-            conn.close()            
+            return responseJSON(400, "F", str(e), []) 
+

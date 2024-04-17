@@ -1,213 +1,38 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ APP_NAME }}{{ " - " ~ menu if menu else "" }}</title>
-
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='assets/favicon-32x32.png') }}">
-    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='assets/favicon-16x16.png') }}">    
-    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='assets/favicon.ico') }}">
-    <!-- Bootstrap 5 CSS -->    
-    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap-5.0.2-dist/css/bootstrap.min.css') }}">    
-    <!-- Sweet Alert 2 CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='sweetalert2/sweetalert2.min.css') }}">    
-
-    <style>   
-        :root {
-            --main: #1E518E;
-        }        
-
-        body {
-            background: #F7F7F7;
-            font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;            
-        }        
-
-        .btn-form {
-            width: 100px;
-        }
-
-        .btn-form:hover {
-            opacity: 90%;
-        }
-    </style>
-</head>
-
-
-<body>        
-    <div class="container">        
-        <div class="row justify-content-center" style="height: 90vh;">
-            <div class="col-sm-12 col-md-12 col-lg-6 my-auto">
-                <div id="cardElement" class="card">
-
-                    <div class="card-header text-center text-light" style="background: var(--main);">
-                        <h3>{{ APP_NAME }}</h3>
-                    </div>
-
-                    <div class="card-body">                            
-                        <!-- Flash message -->
-                        {% with messages = get_flashed_messages(with_categories=true, category_filter=["danger", "success", "info", "warning"]) %}
-                        {% if messages %}
-                        <label class="text-center w-100">
-                            {% for category, message in messages %}                            
-                            <div class="alert alert-{{ category }} p-1" role="alert">
-                                {{ message|safe }}
-                            </div>                            
-                            {% endfor %}
-                        </label>
-                        {% endif %}
-                        {% endwith %}
-                                
-                        <form id="formLogin" method="POST" action="{{ url_for('login') }}">
-                            <div class="mb-3">
-                                <label for="username" class="form-label">Username</label>
-                                <input type="text" class="form-control form-control-sm{{ ' is-invalid' if 'username' in validate }}" id="username" name="username" value="{{ username }}" autocomplete="off"
-                                    placeholder="username" maxlength="12" onkeypress="validateAlnum(event, 'lower')" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="password" class="form-label">Password</label>
-                                <input type="password" class="form-control form-control-sm{{ ' is-invalid' if 'password' in validate }}" id="password" name="password"
-                                    placeholder="password" minlength="6" maxlength="20" required>
-                            </div>
-                            <div class="text-end">
-                                <button type="submit" class="btn btn-sm text-light btn-form" style="background: var(--main);">
-                                    <span>
-                                        Log in
-                                        <i class="fa fa-arrow-right"></i>
-                                    </span>
-                                </button>
-                            </div>
-                        </form>                                                    
-                    </div> <!-- End of card-body -->
-                </div> <!-- End of card -->
-            </div>
+{% extends "layout.html" %}
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center" style="height: 90vh;">
+        <div class="col-sm-12 col-md-12 col-lg-6 my-auto">
+            <div id="cardElement" class="card">
+    
+                <div class="card-header text-center text-light" style="background: var(--main);">
+                    <h3>{{ APP_NAME }}</h3>
+                </div>
+    
+                <div class="card-body">                                                                                   
+                    <form id="formLogin" method="POST" action="{{ url_for('login') }}">
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Username</label>
+                            <input type="text" class="form-control form-control-sm{{ ' is-invalid' if 'username' in validate }}" id="username" name="username" value="{{ username }}" autocomplete="off"
+                                placeholder="username" maxlength="12" onkeypress="validateAlnum(event, 'lower')" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" class="form-control form-control-sm{{ ' is-invalid' if 'password' in validate }}" id="password" name="password"
+                                placeholder="password" minlength="6" maxlength="20" required>
+                        </div>
+                        <div class="text-right">
+                            <button type="submit" class="btn btn-sm text-light btn-form" style="background: var(--main);">
+                                <span>
+                                    Log in
+                                    <i class="fa fa-arrow-right"></i>
+                                </span>
+                            </button>
+                        </div>
+                    </form>                                                    
+                </div> <!-- End of card-body -->
+            </div> <!-- End of card -->
         </div>
     </div>
-
-    <footer class="fixed-bottom text-end p-2" style="background: #FFFFFF;">        
-        <sup class="text-secondary">
-            Copyright &#169; 
-            {{ COPYRIGHT }} 
-            <b style="color: var(--main);">{{ APP_NAME }}</b> 
-            {{ VERSION }}
-        </sup>                                  
-    </footer>
-
-    <!-- Bootstrap 5 JS -->        
-    <script src="{{ url_for('static', filename='bootstrap-5.0.2-dist/js/bootstrap.bundle.min.js') }}"></script>        
-    <!-- Jquery 3.6.4 -->        
-    <script src="{{ url_for('static', filename='jquery-3.6.4/jquery-3.6.4.min.js') }}"></script>     
-    <!-- Jquery Validate -->
-    <script src="{{ url_for('static', filename='jquery-3.6.4/jquery.validate.min.js') }}"></script>
-    <!-- Font Awesome 6 -->        
-    <script src="{{ url_for('static', filename='font-awesome-6/font-awesome-6.js') }}"></script>        
-    <!-- Sweet Alert 2 -->
-    <script src="{{ url_for('static', filename='sweetalert2/sweetalert2.min.js') }}"></script>
-
-    <script type="text/javascript">
-        function alertMessage(category, message) {            
-            Swal.fire({
-                icon                : category == "danger" ? "error" : category, // Change category flash danger into error for icon
-                title               : category == "error" ? "Oops, something went wrong" : "Notification",                
-                html                : `<p class="alert alert-${category == "error" ? "danger" : category} p-2">${message}</p>`, // Change category error into danger for alert class
-                showConfirmButton   : false,
-                showCancelButton    : true,
-                cancelButtonText    : "Close",
-                allowOutsideClick   : false,
-                position            : "top"
-            });
-        };
-
-        function validateAlnum(event, format_text) {            
-            // Get the pressed key
-            let key = event.key;
-
-            // Use a regular expression to check if the key is a letter or a number
-            let regex = /^[a-zA-Z0-9]$/;
-
-            if (!regex.test(key)) {
-                // If the key is not valid, prevent its input
-                event.preventDefault();                
-            } else {
-                // If pressed key is valid
-                let input   = event.target;
-                let maxLength = parseInt(input.getAttribute('maxlength'), 10);                
-                let currentLength = input.value.length;                
-
-                if (currentLength >= maxLength) {
-                    // If at maximum length, prevent further input
-                    event.preventDefault();
-                } else {
-                    if (format_text == "lower") {
-                        event.target.value += key.toLowerCase();
-                    } else if (format_text == "upper") {
-                        event.target.value += key.toUpperCase();
-                    } else {
-                        event.target.value += key;
-                    }
-                    event.preventDefault();
-                }
-            }
-        };
-    
-        $("#formLogin").validate({    
-            rules           : {
-                username    : {
-                    required    : true,
-                    maxlength   : 12
-                },
-                password    : {
-                    required    : true,
-                    minlength   : 6,
-                    maxlength   : 20
-                }
-            },        
-            messages        : {
-                username        : {
-                    required        : "This field is required.",
-                    maxlength       : "Username must not exceed {0} characters."
-                },
-                password        : {
-                    required        : "This field is required.",
-                    minlength       : "Please enter at least {0} characters.",
-                    maxlength       : "Password must not exceed {0} characters."
-                }
-            },
-            errorPlacement  : function (error, element) {
-                // Custom error placement for Bootstrap
-                error.addClass("invalid-feedback");
-                error.insertAfter(element);
-            },
-            highlight: function (element, errorClass, validClass) {
-                // Add Bootstrap is-invalid class to the form-control element
-                $(element).addClass("is-invalid");
-                // Add error class to the label
-                $(element).prev('label').addClass("is-invalid");
-            },
-            unhighlight: function (element, errorClass, validClass) {
-                // Remove Bootstrap is-invalid class from the form-control element
-                $(element).removeClass("is-invalid");
-                // Remove error class from the label
-                $(element).prev('label').removeClass("is-invalid");
-            },           
-            submitHandler   : function (form) {
-                form.submit();
-            }
-        });
-    </script>
-
-    {% with messages = get_flashed_messages(with_categories=true, category_filter=["error"]) %}
-    {% if messages %}    
-        {% for category, message in messages %}        
-        <script type="text/javascript">
-            let category    = {{ category|trim|tojson|safe }};
-            let message     = {{ message|trim|tojson|safe }};
-            alertMessage(category, message);
-        </script>        
-        {% endfor %}    
-    {% endif %}
-    {% endwith %}    
-</body>
-
-</html>
+</div>
+{% endblock content %}

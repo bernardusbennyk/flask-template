@@ -1,22 +1,31 @@
-from flask import flash, redirect, render_template, request, url_for
+from flask import abort, flash, redirect, render_template, request, url_for
 from flask_login import login_user, logout_user, login_required
 from hashlib import md5
 from flask_template import app, login_manager
 from flask_template.models.userModel import User
 from flask_template.controllers.validate import login_not_allowed
-from flask_template.dao.userDao import get_data_user_loader, validate_user_login
+from flask_template.dao.userDao import Login
 
 @login_manager.user_loader
 def load_user(user_id):
     """ Load session user """    
-    v_get_data_user_loader = get_data_user_loader(user_id)
-    # If user not exists or error return None
-    if (v_get_data_user_loader["status"] == "F" or not v_get_data_user_loader["result"]): return None
+    login   = Login()
+    try:
+        v_get_data_user_loader = login.get_data_user_loader(user_id)
+        # If user not exists or error return None
+        if (v_get_data_user_loader["status"] == "F" or not v_get_data_user_loader["result"]): 
+            app.logger.error(f"dao get_data_user_loader: {v_get_data_user_loader['message']}")
+            return None
 
-    # Set session user    
-    username    = user_id
-    user_role   = v_get_data_user_loader["result"][0]["u_role"]
-    return User(username, user_role)
+        # Set session user    
+        username    = user_id
+        user_role   = v_get_data_user_loader["result"][0]["u_role"]
+        return User(username, user_role)
+    except Exception as e:
+        print("Error load_user", str(e))
+        abort(500, str(e))
+    finally:
+        del login
 
 @app.route("/login", methods=["GET", "POST"])
 @login_not_allowed
@@ -33,53 +42,61 @@ def login():
     
     # Process log in
     elif request.method == "POST":
-        username    = request.form.get("username", None)
-        password    = request.form.get("password", None)
+        login   = Login()
+        try:
+            username    = request.form.get("username", None)
+            password    = request.form.get("password", None)
 
-        # Validate input data
-        validate    = []
-        if (username in [None, ""]):
-            validate.append("username")            
-        if (password in [None, ""]):
-            validate.append("password")            
-        if (validate):
-            message     = f"<strong>{', '.join(validate)}</strong> must not be empty."
-            flash_type  = "danger"
-            flash(message, flash_type)
-            return redirect(url_for("login", validate=validate))
-        
-        # Hash password with md5
-        password    = md5(password.encode()).hexdigest()
+            # Validate input data
+            validate    = []
+            if (username in [None, ""]):
+                validate.append("username")            
+            if (password in [None, ""]):
+                validate.append("password")            
+            if (validate):
+                message     = f"<strong>{', '.join(validate)}</strong> must not be empty."
+                flash_type  = "danger"
+                flash(message, flash_type)
+                return redirect(url_for("login", validate=validate))
+            
+            # Hash password with md5
+            password    = md5(password.encode()).hexdigest()
 
-        # Validate user login
-        v_validate_user_login   = validate_user_login(username, password)
-        if (v_validate_user_login["status"] == "F"):
-            message     = v_validate_user_login["message"]
-            flash_type  = "error"
-            flash(message, flash_type)
-            return redirect(url_for("login"))
-        elif (not v_validate_user_login["result"]):
-            message     = "Username and password not match."
-            flash_type  = "danger"
-            flash(message, flash_type)
-            return redirect(url_for("login", username=username))
-        
-        # Set user data        
-        v_username      = v_validate_user_login["result"][0]["u_username"] 
-        v_role          = v_validate_user_login["result"][0]["u_role"]
-        v_status_user   = v_validate_user_login["result"][0]["u_status"]
+            # Validate user login
+            v_validate_user_login   = login.validate_user_login(username, password)
+            if (v_validate_user_login["status"] == "F"):
+                app.logger.error(f"dao validate_user_login: {v_validate_user_login['message']}")
+                message     = v_validate_user_login["message"]
+                flash_type  = "error"
+                flash(message, flash_type)
+                return redirect(url_for("login"))
+            elif (not v_validate_user_login["result"]):
+                message     = "Username and password not match."
+                flash_type  = "danger"
+                flash(message, flash_type)
+                return redirect(url_for("login", username=username))
+            
+            # Set user data        
+            v_username      = v_validate_user_login["result"][0]["u_username"] 
+            v_role          = v_validate_user_login["result"][0]["u_role"]
+            v_status_user   = v_validate_user_login["result"][0]["u_status"]
 
-        # Check status user active or inactive 
-        if (v_status_user == "F"):
-            message     = "Account deactivated."
-            flash_type  = "info"
-            flash(message, flash_type)
-            return redirect(url_for("login"))
-        
-        # Set session user loader
-        user    = User(v_username, v_role)        
-        login_user(user)                               
-        return redirect(url_for("home"))
+            # Check status user active or inactive 
+            if (v_status_user == "F"):
+                message     = "Account deactivated."
+                flash_type  = "info"
+                flash(message, flash_type)
+                return redirect(url_for("login"))
+            
+            # Set session user loader
+            user    = User(v_username, v_role)        
+            login_user(user)                               
+            return redirect(url_for("home"))
+        except Exception as e:
+            app.logger.error(f"controller login (POST): {e}")
+            abort(500, str(e))
+        finally:
+            del login
 
 @app.route('/logout', methods=['GET'])
 @login_required
