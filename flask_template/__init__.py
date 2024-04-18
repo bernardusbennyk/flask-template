@@ -1,7 +1,7 @@
 import logging, psycopg2
 import logging.handlers
 from dotenv import load_dotenv
-from flask import Flask
+from flask import abort, Flask
 from flask_login import LoginManager
 
 # Load dotenv
@@ -39,6 +39,7 @@ def connectionDB():
         return conn
     except psycopg2.Error as e:
         app.logger.error(f"Create connection: {e}")
+        abort(500, str(e))
 
 # Declare route controller application
 from flask_template.controllers import (routes, validate, user)
