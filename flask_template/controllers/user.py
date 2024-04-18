@@ -27,18 +27,23 @@ def load_user(user_id):
     finally:
         del login
 
+@app.route("/", methods=["GET"])
 @app.route("/login", methods=["GET", "POST"])
 @login_not_allowed
 def login():
     # Load login page
-    if request.method == "GET":                              
-        # For highlight invalid form
-        validate    = request.args.getlist("validate")
+    if request.method == "GET":   
+        try:                           
+            # For highlight invalid form
+            validate    = request.args.getlist("validate")
 
-        # Set username value back to form
-        username    = request.args.get("username", "")
+            # Set username value back to form
+            username    = request.args.get("username", "")
 
-        return render_template("login.html", menu="Login", username=username, validate=validate)
+            return render_template("login.html", menu="Login", username=username, validate=validate)
+        except Exception as e:
+            app.logger.error(f"Controller login (GET): {e}")
+            abort(500, str(e))
     
     # Process log in
     elif request.method == "POST":
@@ -101,5 +106,9 @@ def login():
 @app.route('/logout', methods=['GET'])
 @login_required
 def logout():
-    logout_user()
-    return redirect(url_for("login"))
+    try:
+        logout_user()
+        return redirect(url_for("login"))
+    except Exception as e:
+        app.logger.error(f"Controller logout: {e}")
+        abort(500, str(e))

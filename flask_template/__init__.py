@@ -27,15 +27,18 @@ handler.setFormatter(log_format)
 app.logger.addHandler(handler)
 app.logger.setLevel(logging.INFO)
 
-def connectionDB():    
-    conn = psycopg2.connect(
-        host        = app.config["HOST_DB"],
-        database    = app.config["SID_DB"],
-        port        = app.config["PORT_DB"],
-        user        = app.config["USER_DB"],
-        password    = app.config["PASSWORD_DB"]
-    )
-    return conn
+def connectionDB():  
+    try:  
+        conn = psycopg2.connect(
+            host        = app.config["HOST_DB"],
+            database    = app.config["SID_DB"],
+            port        = app.config["PORT_DB"],
+            user        = app.config["USER_DB"],
+            password    = app.config["PASSWORD_DB"]
+        )
+        return conn
+    except psycopg2.Error as e:
+        app.logger.error(f"Create connection: {e}")
 
 # Declare route controller application
 from flask_template.controllers import (routes, validate, user)

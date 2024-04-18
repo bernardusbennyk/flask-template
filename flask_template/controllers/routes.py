@@ -1,10 +1,10 @@
-from flask import render_template
+from flask import abort, render_template
 from flask_login import login_required
 from flask_template import app
 
-@app.route("/", methods=["GET"])
+@app.route("/home", methods=["GET"])
 @login_required
-def home():
+def home():               
     return render_template("home.html", menu="Home")
 
 @app.context_processor
@@ -28,3 +28,7 @@ def handle_bad_request(e):
 @app.errorhandler(405)
 def handle_method_not_allowed(e):
     return render_template("errors/405.html")
+
+@app.errorhandler(500)
+def handle_internal_server_error(e):    
+    return render_template("errors/500.html")
