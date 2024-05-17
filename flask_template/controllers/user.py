@@ -1,31 +1,28 @@
 from flask import abort, flash, redirect, render_template, request, url_for
 from flask_login import login_user, logout_user, login_required
-from hashlib import md5
 from flask_template import app, login_manager
-from flask_template.models.userModel import User
 from flask_template.controllers.validate import login_not_allowed
-from flask_template.dao.userDao import Login
+from flask_template.models.LoginModel import User
+from flask_template.others.utils import verify_password, hash_password
+from flask_template.dao.userDao import get_data_user_loader, get_data_user_login
 
 @login_manager.user_loader
 def load_user(user_id):
-    """ Load session user """    
-    login   = Login()
+    """ Load session user """        
     try:
-        v_get_data_user_loader = login.get_data_user_loader(user_id)
+        v_get_data_user_loader = get_data_user_loader(user_id)
         # If user not exists or error return None
         if (v_get_data_user_loader["status"] == "F" or not v_get_data_user_loader["result"]): 
             app.logger.error(f"DAO get_data_user_loader: {v_get_data_user_loader['message']}")
             return None
 
         # Set session user    
-        username    = user_id
-        user_role   = v_get_data_user_loader["result"][0]["u_role"]
-        return User(username, user_role)
+        id          = user_id
+        username    = v_get_data_user_loader["result"]["username"]
+        return User(id, username)
     except Exception as e:
         app.logger.error(f"Controller load_user: {e}")
-        abort(500, str(e))
-    finally:
-        del login
+        abort(500, str(e))    
 
 @app.route("/", methods=["GET"])
 @app.route("/login", methods=["GET", "POST"])
@@ -46,11 +43,10 @@ def login():
             abort(500, str(e))
     
     # Process log in
-    elif request.method == "POST":
-        login   = Login()
+    elif request.method == "POST":        
         try:
             username    = request.form.get("username", None)
-            password    = request.form.get("password", None)
+            password    = request.form.get("password", None)            
 
             # Validate input data
             validate    = []
@@ -64,46 +60,50 @@ def login():
                 flash(message, flash_type)
                 return redirect(url_for("login", validate=validate))
             
-            # Hash password with md5
-            password    = md5(password.encode()).hexdigest()
-
-            # Validate user login
-            v_validate_user_login   = login.validate_user_login(username, password)
-            if (v_validate_user_login["status"] == "F"):
-                app.logger.error(f"DAO validate_user_login: {v_validate_user_login['message']}")
-                message     = v_validate_user_login["message"]
+            # Get data user login            
+            v_get_data_user_login   = get_data_user_login(username)                        
+            if (v_get_data_user_login["status"] == "F"):
+                app.logger.error(f"DAO get_data_user_login: {v_get_data_user_login['message']}")
+                message     = v_get_data_user_login["message"]
                 flash_type  = "error"
                 flash(message, flash_type)
                 return redirect(url_for("login"))
-            elif (not v_validate_user_login["result"]):
-                message     = "Username and password not match."
+            elif (not v_get_data_user_login["result"]):
+                message     = f"User {username} not found"
                 flash_type  = "danger"
                 flash(message, flash_type)
-                return redirect(url_for("login", username=username))
-            
-            # Set user data        
-            v_username      = v_validate_user_login["result"][0]["u_username"] 
-            v_role          = v_validate_user_login["result"][0]["u_role"]
-            v_status_user   = v_validate_user_login["result"][0]["u_status"]
+                return redirect(url_for("login"))
 
-            # Check status user active or inactive 
-            if (v_status_user == "F"):
-                message     = "Account deactivated."
-                flash_type  = "info"
+            # Set data user from database
+            user_id         = v_get_data_user_login["result"]["id"]
+            hash_password   = v_get_data_user_login["result"]["password"]
+            user_is_active  = v_get_data_user_login["result"]["is_active"]
+
+            # Verify password with bcrypt            
+            validate_password   = verify_password(password, hash_password)
+            
+            if (validate_password is False):
+                message     = "Username and password doesn't match"
+                flash_type  = "danger"
                 flash(message, flash_type)
                 return redirect(url_for("login"))
             
+            # Check status user active or inactive
+            if (user_is_active is False):
+                message     = "Account deactivated"
+                flash_type  = "info"
+                flash(message, flash_type)
+                return redirect(url_for("login"))
+
             # Set session user loader
-            user    = User(v_username, v_role)        
+            user    = User(user_id, username)        
             login_user(user)                               
-            return redirect(url_for("home"))
+            return redirect(url_for("dashboard"))
         except Exception as e:
             app.logger.error(f"Controller login (POST): {e}")
-            abort(500, str(e))
-        finally:
-            del login
+            abort(500, str(e))        
 
-@app.route('/logout', methods=['GET'])
+@app.route("/logout", methods=["GET"])
 @login_required
 def logout():
     try:
@@ -112,3 +112,18 @@ def logout():
     except Exception as e:
         app.logger.error(f"Controller logout: {e}")
         abort(500, str(e))
+
+@app.route("/addUser", methods=["GET"])
+def addUser():
+    from flask_template import db     
+    from flask_template.models.dbModel import User      
+
+    hash_pw = hash_password("asdjklal")    
+    new_user = User(
+        username='admin',     
+        password=hash_pw,
+        created_by='root'
+    )         
+    db.session.add(new_user)
+    db.session.commit()
+    return "success"

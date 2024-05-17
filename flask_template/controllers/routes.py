@@ -1,11 +1,16 @@
-from flask import abort, render_template
-from flask_login import login_required
-from flask_template import app
+from flask import abort, jsonify, render_template
+from sqlalchemy.exc import OperationalError
+from flask_template import app, db
 
-@app.route("/home", methods=["GET"])
-@login_required
-def home():               
-    return render_template("home.html", menu="Home")
+@app.route("/health")
+def health():            
+    app_status  = "UP"
+    try:
+        db.engine.connect()
+        db_status   = "UP"
+    except OperationalError:
+        db_status   = "DOWN"
+    return jsonify({"app_status": app_status, "db_status": db_status})
 
 @app.context_processor
 def global_var():

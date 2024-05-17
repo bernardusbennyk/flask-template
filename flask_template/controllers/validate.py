@@ -7,6 +7,6 @@ def login_not_allowed(fn):
     @wraps(fn)
     def wrapper(*args, **kwargs):
         if (current_user.is_authenticated):
-            return redirect(url_for("home"))
+            return redirect(url_for("dashboard"))
         return fn(*args, **kwargs)
     return wrapper

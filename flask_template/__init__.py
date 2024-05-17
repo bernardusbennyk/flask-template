@@ -1,8 +1,10 @@
-import logging, psycopg2
+import logging
 import logging.handlers
 from dotenv import load_dotenv
-from flask import abort, Flask
+from flask import Flask
 from flask_login import LoginManager
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 
 # Load dotenv
 load_dotenv()
@@ -11,9 +13,12 @@ load_dotenv()
 app = Flask(__name__)
 app.config.from_pyfile("settings.py")
 
+# Initialize SQLAlchemy
+db      = SQLAlchemy(app)
+migrate = Migrate(app, db, compare_type=True)
+
 # Initialize session login
-login_manager = LoginManager()
-login_manager.init_app(app)
+login_manager = LoginManager(app)
 
 # Handle session login redirect and message
 login_manager.login_view                = "login"
@@ -27,19 +32,5 @@ handler.setFormatter(log_format)
 app.logger.addHandler(handler)
 app.logger.setLevel(logging.INFO)
 
-def connectionDB():  
-    try:  
-        conn = psycopg2.connect(
-            host        = app.config["HOST_DB"],
-            database    = app.config["SID_DB"],
-            port        = app.config["PORT_DB"],
-            user        = app.config["USER_DB"],
-            password    = app.config["PASSWORD_DB"]
-        )
-        return conn
-    except psycopg2.Error as e:
-        app.logger.error(f"Create connection: {e}")
-        abort(500, str(e))
-
 # Declare route controller application
-from flask_template.controllers import (routes, validate, user)
+from flask_template.controllers import (routes, validate, user, dashboard)
