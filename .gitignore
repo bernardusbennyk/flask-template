@@ -3,3 +3,4 @@ static/
 .env
 .flaskenv
 app.log
+.pytest_cache
