@@ -27,7 +27,7 @@ login_manager.login_message_category    = "danger"
 
 # Initialize logging
 log_format  = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s") 
-handler     = logging.handlers.RotatingFileHandler("app.log", maxBytes=10000, backupCount=1)
+handler     = logging.handlers.RotatingFileHandler("app.log", maxBytes=10485760, backupCount=2)
 handler.setFormatter(log_format)
 app.logger.addHandler(handler)
 app.logger.setLevel(logging.INFO)
