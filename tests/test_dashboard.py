@@ -7,6 +7,6 @@ def test_dashboard_auth_access(client, auth):
     response = client.get("/dashboard") 
     assert response.status_code == 200
 
-def test_dashboard_noauth_access(client):
+def test_dashboard_unauth_access(client):
     response = client.get("/dashboard") 
     assert response.status_code == 302

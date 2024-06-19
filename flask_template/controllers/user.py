@@ -1,19 +1,21 @@
+import traceback
 from flask import abort, flash, redirect, render_template, request, url_for
 from flask_login import login_user, logout_user, login_required
 from flask_template import app, login_manager
 from flask_template.controllers.validate import login_not_allowed
 from flask_template.models.LoginModel import User
 from flask_template.others.utils import verify_password, hash_password
-from flask_template.dao.userDao import get_data_user_loader, get_data_user_login
+from flask_template.dao.userDao import Login
 
 @login_manager.user_loader
 def load_user(user_id):
-    """ Load session user """        
+    """ Load session user """   
+    login = None     
     try:
-        v_get_data_user_loader = get_data_user_loader(user_id)
+        login             = Login()
+        v_get_data_user_loader  = login.get_data_user_loader(user_id)         
         # If user not exists or error return None
-        if (v_get_data_user_loader["status"] == "F" or not v_get_data_user_loader["result"]): 
-            app.logger.error(f"DAO get_data_user_loader: {v_get_data_user_loader['message']}")
+        if (v_get_data_user_loader["status"] == "F" or not v_get_data_user_loader["result"]):             
             return None
 
         # Set session user    
@@ -21,8 +23,11 @@ def load_user(user_id):
         username    = v_get_data_user_loader["result"]["username"]
         return User(id, username)
     except Exception as e:
-        app.logger.error(f"Controller load_user: {e}")
+        app.logger.error(f"load_user: {traceback.format_exc()}")
         abort(500, str(e))    
+    finally:
+        if (login):
+            del login
 
 @app.route("/", methods=["GET"])
 @app.route("/login", methods=["GET", "POST"])
@@ -39,12 +44,13 @@ def login():
 
             return render_template("login.html", menu="Login", username=username, validate=validate)
         except Exception as e:
-            app.logger.error(f"Controller login (GET): {e}")
+            app.logger.error(f"render login: {traceback.format_exc()}")
             abort(500, str(e))
     
     # Process log in
-    elif request.method == "POST":        
-        try:
+    elif request.method == "POST":
+        login   = Login()
+        try:            
             username    = request.form.get("username", None)
             password    = request.form.get("password", None)            
 
@@ -60,10 +66,9 @@ def login():
                 flash(message, flash_type)
                 return redirect(url_for("login", validate=validate))
             
-            # Get data user login            
-            v_get_data_user_login   = get_data_user_login(username)                        
-            if (v_get_data_user_login["status"] == "F"):
-                app.logger.error(f"DAO get_data_user_login: {v_get_data_user_login['message']}")
+            # Get data user login                        
+            v_get_data_user_login   = login.get_data_user_login(username)                                 
+            if (v_get_data_user_login["status"] == "F"):                
                 message     = v_get_data_user_login["message"]
                 flash_type  = "error"
                 flash(message, flash_type)
@@ -100,8 +105,11 @@ def login():
             login_user(user)                               
             return redirect(url_for("dashboard"))
         except Exception as e:
-            app.logger.error(f"Controller login (POST): {e}")
+            app.logger.error(f"login: {traceback.format_exc()}")
             abort(500, str(e))        
+        finally:
+            if (login):
+                del login
 
 @app.route("/logout", methods=["GET"])
 @login_required
@@ -110,20 +118,40 @@ def logout():
         logout_user()
         return redirect(url_for("login"))
     except Exception as e:
-        app.logger.error(f"Controller logout: {e}")
+        app.logger.error(f"logout: {traceback.format_exc()}")
         abort(500, str(e))
 
 @app.route("/addUser", methods=["GET"])
 def addUser():
     from flask_template import db     
-    from flask_template.models.dbModel import User      
+    from flask_template.models.dbModel import User
+    from flask_template.others.utils import execute_db
+    
+    def operation():
+        hash_pw = hash_password("asdjklal")    
+        new_user = User(
+            username='admin',     
+            password=hash_pw,
+            created_by='root'
+        )         
+        db.session.add(new_user)
+        db.session.commit()
+        return None        
+    
+    return execute_db(operation, "Insert data success", None)
 
-    hash_pw = hash_password("asdjklal")    
-    new_user = User(
-        username='admin',     
-        password=hash_pw,
-        created_by='root'
-    )         
-    db.session.add(new_user)
-    db.session.commit()
-    return "success"
+@app.route("/updateUser", methods=["GET"])
+def updateUser():
+    from flask_template import db     
+    from flask_template.models.dbModel import User
+    from flask_template.others.utils import execute_db
+    
+    def operation():
+        result = db.session.query(User) \
+            .filter(User.username == "admin", 
+                    User.is_active == True) \
+            .update({"is_active": False})   
+        db.session.commit()     
+        return result
+        
+    return execute_db(operation, "Update data success", None)
