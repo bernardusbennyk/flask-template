@@ -5,29 +5,24 @@ from flask_template import app, login_manager
 from flask_template.controllers.validate import login_not_allowed
 from flask_template.models.LoginModel import User
 from flask_template.others.utils import verify_password, hash_password
-from flask_template.dao.userDao import Login
+from flask_template.dao.userDao import get_data_user_loader, get_data_user_login
 
 @login_manager.user_loader
 def load_user(user_id):
-    """ Load session user """   
-    login = None     
-    try:
-        login             = Login()
-        v_get_data_user_loader  = login.get_data_user_loader(user_id)         
+    """ Load session user """       
+    try:        
+        v_get_data_user_loader  = get_data_user_loader(user_id)        
         # If user not exists or error return None
-        if (v_get_data_user_loader["status"] == "F" or not v_get_data_user_loader["result"]):             
+        if (v_get_data_user_loader["status"] == "F" or not v_get_data_user_loader["result"]):                  
             return None
-
+        
         # Set session user    
         id          = user_id
         username    = v_get_data_user_loader["result"]["username"]
         return User(id, username)
     except Exception as e:
         app.logger.error(f"load_user: {traceback.format_exc()}")
-        abort(500, str(e))    
-    finally:
-        if (login):
-            del login
+        abort(500, str(e))
 
 @app.route("/", methods=["GET"])
 @app.route("/login", methods=["GET", "POST"])
@@ -48,8 +43,7 @@ def login():
             abort(500, str(e))
     
     # Process log in
-    elif request.method == "POST":
-        login   = Login()
+    elif request.method == "POST":        
         try:            
             username    = request.form.get("username", None)
             password    = request.form.get("password", None)            
@@ -67,7 +61,7 @@ def login():
                 return redirect(url_for("login", validate=validate))
             
             # Get data user login                        
-            v_get_data_user_login   = login.get_data_user_login(username)                                 
+            v_get_data_user_login   = get_data_user_login(username)                                 
             if (v_get_data_user_login["status"] == "F"):                
                 message     = v_get_data_user_login["message"]
                 flash_type  = "error"
@@ -102,14 +96,11 @@ def login():
 
             # Set session user loader
             user    = User(user_id, username)        
-            login_user(user)                               
+            login_user(user)                                           
             return redirect(url_for("dashboard"))
         except Exception as e:
             app.logger.error(f"login: {traceback.format_exc()}")
-            abort(500, str(e))        
-        finally:
-            if (login):
-                del login
+            abort(500, str(e))                
 
 @app.route("/logout", methods=["GET"])
 @login_required
@@ -124,34 +115,26 @@ def logout():
 @app.route("/addUser", methods=["GET"])
 def addUser():
     from flask_template import db     
-    from flask_template.models.dbModel import User
-    from flask_template.others.utils import execute_db
-    
-    def operation():
-        hash_pw = hash_password("asdjklal")    
-        new_user = User(
-            username='admin',     
-            password=hash_pw,
-            created_by='root'
-        )         
-        db.session.add(new_user)
-        db.session.commit()
-        return None        
-    
-    return execute_db(operation, "Insert data success", None)
+    from flask_template.models.dbModel import User    
+        
+    hash_pw = hash_password("asdjklal")    
+    new_user = User(
+        username='admin',     
+        password=hash_pw,
+        created_by='root'
+    )         
+    db.session.add(new_user)
+    db.session.commit()
+    return {"message": "Add user successful"}
 
 @app.route("/updateUser", methods=["GET"])
 def updateUser():
     from flask_template import db     
-    from flask_template.models.dbModel import User
-    from flask_template.others.utils import execute_db
-    
-    def operation():
-        result = db.session.query(User) \
-            .filter(User.username == "admin", 
-                    User.is_active == True) \
-            .update({"is_active": False})   
-        db.session.commit()     
-        return result
+    from flask_template.models.dbModel import User    
         
-    return execute_db(operation, "Update data success", None)
+    result = db.session.query(User) \
+        .filter(User.username == "admin", 
+                User.is_active == True) \
+        .update({"is_active": False})   
+    db.session.commit()     
+    return {"message": f"Update {result} user success"}
